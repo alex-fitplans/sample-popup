@@ -1,0 +1,49 @@
+﻿@page "/"
+@using TestMudWasm.Components
+@inject NavigationManager NavigationManager
+@inject IDialogService DialogService
+@implements IDisposable
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+<MudButton OnClick="Callback" Variant="Variant.Filled" Color="Color.Primary">Click Me</MudButton>
+
+@code
+{
+    private IDialogReference? _currentDialog = null;
+    
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        NavigationManager.LocationChanged += NavigationManagerOnLocationChanged; 
+    }
+
+    private void NavigationManagerOnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        if (_currentDialog != null)
+            _currentDialog.Close();
+    }
+
+    private async void Callback()
+    {
+        var options = new DialogOptions { CloseOnEscapeKey = true };
+        NavigationManager.NavigateTo("#", false, false);
+        _currentDialog = await DialogService.ShowAsync<SampleDialog>("Simple Dialog", options);
+        var result = await _currentDialog.Result; 
+        if (!result.Canceled)
+        {
+            // Do something
+        }
+        
+        // Navigate back - example
+        NavigationManager.NavigateTo("/", false, true);
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= NavigationManagerOnLocationChanged; 
+    }
+}
